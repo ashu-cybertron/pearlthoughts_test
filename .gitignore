@@ -1,0 +1,31 @@
+# Ignore Terraform files that are automatically generated
+.terraform/
+
+# Ignore .tfstate files, which are the Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Ignore crash log files
+crash.log
+
+# Ignore override files as they can contain sensitive information
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore backup files and editor temporary files
+*~
+*.swp
+*.bak
+
+# Ignore files used to store provider credentials
+*.pem
+*.key
+*.pub
+
+# Ignore local tfvars files
+*.tfvars
+
+# Ignore .DS_Store files (Mac OS)
+.DS_Store

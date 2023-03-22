@@ -1,0 +1,14 @@
+[
+    {
+      "name": "web",
+      "image": "your-ecr-repo-url/your-image-name:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000
+        }
+      ],
+      "essential": true,
+      "memoryReservation": 128
+    }
+  ]
