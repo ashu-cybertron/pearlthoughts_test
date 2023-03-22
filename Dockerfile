@@ -8,7 +8,7 @@ RUN npm install
 
 RUN npm install express
 
-COPY . .
+COPY ./* ./
 
 EXPOSE 3000
 
