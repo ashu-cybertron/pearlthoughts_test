@@ -11,7 +11,6 @@ env:
   AWS_REGION: us-east-1
   ECS_CLUSTER: test-cluster
   ECS_SERVICE: test-service
-  CONTAINER_NAME: test-container
 
 jobs:
   build:
@@ -53,7 +52,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ env.ECS_SERVICE }}
-          container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
       - name: Update ECS service
