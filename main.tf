@@ -12,18 +12,41 @@ resource "aws_vpc" "test_vpc" {
   }
 }
 
-resource "aws_subnet" "public" {
+resource "aws_internet_gateway" "test_igw" {
+  vpc_id = aws_vpc.test_vpc.id
+
+  tags = {
+    Name = "test-igw"
+  }
+}
+
+resource "aws_internet_gateway_attachment" "test_vpc_attachment" {
+  count               = 0
+  internet_gateway_id = aws_internet_gateway.test_igw.id
+  vpc_id              = aws_vpc.test_vpc.id
+}
+
+resource "aws_subnet" "public_subnet_1" {
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
   vpc_id            = aws_vpc.test_vpc.id
   tags = {
-    Name = "test-public-subnet"
+    Name = "test-public-subnet-01"
+  }
+}
+
+resource "aws_subnet" "public_subnet_2" {
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+  vpc_id            = aws_vpc.test_vpc.id
+  tags = {
+    Name = "test-public-subnet-01"
   }
 }
 
 resource "aws_subnet" "private" {
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "us-east-1c"
   vpc_id            = aws_vpc.test_vpc.id
 
   tags = {
@@ -59,14 +82,28 @@ resource "aws_ecr_repository" "test_ecr_repo" {
 
 resource "aws_ecs_task_definition" "test_task_definition" {
   family                   = "test-task"
-  container_definitions    = file("${path.module}/container-definition.json")
+  task_role_arn            = aws_iam_role.ecs_task_execution.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
-}
 
+  container_definitions = jsonencode([
+    {
+      "name" : "test-container",
+      "image" : "${aws_ecr_repository.test_ecr_repo.repository_url}:latest",
+      "portMappings" : [
+        {
+          "containerPort" : 3000,
+          "hostPort" : 3000
+        }
+      ],
+      "essential" : true,
+      "memoryReservation" : 128
+    }
+  ])
+}
 resource "aws_ecs_service" "test_service" {
   name            = "test-service"
   cluster         = aws_ecs_cluster.test_cluster.id
@@ -91,6 +128,7 @@ resource "aws_ecs_cluster" "test_cluster" {
 
 resource "aws_security_group" "test_security_group" {
   name_prefix = "test-sg"
+  vpc_id      = aws_vpc.test_vpc.id
 
   ingress {
     from_port   = 3000
@@ -106,9 +144,12 @@ resource "aws_lb" "test_lb" {
   load_balancer_type = "application"
 
   subnet_mapping {
-    subnet_id = aws_subnet.public.id
+    subnet_id = aws_subnet.public_subnet_1.id
   }
 
+  subnet_mapping {
+    subnet_id = aws_subnet.public_subnet_2.id
+  }
   tags = {
     Name = "test-lb"
   }
@@ -117,10 +158,10 @@ resource "aws_lb" "test_lb" {
 
 resource "aws_lb_target_group" "test_target_group" {
   name_prefix = "testtg"
-
   port        = 3000
   protocol    = "HTTP"
   target_type = "ip"
+  vpc_id      = aws_vpc.test_vpc.id
 
   health_check {
     interval            = 30

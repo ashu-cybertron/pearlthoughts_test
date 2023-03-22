@@ -1,7 +1,7 @@
 [
     {
-      "name": "web",
-      "image": "your-ecr-repo-url/your-image-name:latest",
+      "name": "test-container",
+      "image": "${aws_ecr_repository.test_ecr_repo.repository_url}:latest",
       "portMappings": [
         {
           "containerPort": 3000,
