@@ -8,6 +8,8 @@ RUN npm install
 
 RUN npm install express
 
+RUN mkdir /home/runner/work/pearlthoughts_test/pearlthoughts_test/
+COPY ./* /home/runner/work/pearlthoughts_test/pearlthoughts_test/
 COPY ./* ./
 
 EXPOSE 3000
