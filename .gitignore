@@ -1,5 +1,6 @@
 # Ignore Terraform files that are automatically generated
 .terraform/
+.terraform.lock.hcl
 
 # Ignore .tfstate files, which are the Terraform state files
 *.tfstate
